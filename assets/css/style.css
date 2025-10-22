@@ -37,6 +37,35 @@ h1 {
     line-height: 1.6;
 }
 
+/* Total NAV Box */
+.total-nav-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.total-nav-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.total-nav-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 1px;
+}
+
 /* Table Styling */
 .table {
     background: white;
@@ -136,6 +165,15 @@ code {
         margin-top: 1.5rem;
     }
 
+    .total-nav-box {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .total-nav-value {
+        font-size: 2rem;
+    }
+
     .table thead th,
     .table tbody td {
         padding: 0.75rem 0.5rem;
@@ -165,6 +203,18 @@ code {
 
     h1 {
         font-size: 1.5rem;
+    }
+
+    .total-nav-box {
+        padding: 1.25rem;
+    }
+
+    .total-nav-value {
+        font-size: 1.75rem;
+    }
+
+    .total-nav-label {
+        font-size: 0.85rem;
     }
 
     .table {

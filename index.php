@@ -25,6 +25,12 @@ $strategies = getAllStrategies($pdo);
 // Calculate total strategies
 $totalStrategies = count($strategies);
 
+// Calculate total NAV
+$totalNav = 0;
+foreach ($strategies as $strategy) {
+    $totalNav += floatval($strategy['nav']);
+}
+
 // Get current time for display
 $currentTime = new DateTime();
 $currentTimeFormatted = $currentTime->format('d.m.Y H:i:s');
@@ -58,6 +64,15 @@ $currentTimeFormatted = $currentTime->format('d.m.Y H:i:s');
                             Last Update: <strong id="updateTime"><?php echo $currentTimeFormatted; ?></strong>
                         </small>
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="total-nav-box">
+                    <div class="total-nav-label">Total NAV</div>
+                    <div class="total-nav-value" id="totalNav"><?php echo formatNav($totalNav); ?></div>
                 </div>
             </div>
         </div>
