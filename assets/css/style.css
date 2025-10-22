@@ -1,0 +1,203 @@
+/* Hummingbot Dashboard Styling */
+
+:root {
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    background-color: #ffffff;
+    color: #212529;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.container-fluid {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+h1 {
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+/* Dashboard Info */
+.dashboard-info {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-info p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Table Styling */
+.table {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table thead th {
+    font-weight: 600;
+    color: #495057;
+    padding: 1.25rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+}
+
+/* Status Row Classes */
+.table tbody tr.status-success {
+    border-left: 4px solid var(--success-color);
+}
+
+.table tbody tr.status-warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.table tbody tr.status-danger {
+    border-left: 4px solid var(--danger-color);
+}
+
+.table tbody tr.status-unknown {
+    border-left: 4px solid #6c757d;
+}
+
+/* Status Indicators */
+.status-indicator {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+/* Code Styling for NAV */
+code {
+    background-color: #f8f9fa;
+    color: #005c7a;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.95rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info {
+    background-color: #e7f3ff;
+    color: #004085;
+    border-left: 4px solid #0c5aa6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-info {
+        margin-top: 1.5rem;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .table thead th {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-8,
+    .col-md-4 {
+        flex-basis: 100%;
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .text-end {
+        text-align: left !important;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .status-indicator {
+        font-size: 1rem;
+        margin-right: 0.25rem;
+    }
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.table {
+    animation: fadeIn 0.3s ease-in;
+}

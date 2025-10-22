@@ -13,5 +13,16 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
+# Database files
+data/database.sqlite
+data/database.sqlite-wal
+data/database.sqlite-shm
+
+# Log files
+logs/*.log
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~

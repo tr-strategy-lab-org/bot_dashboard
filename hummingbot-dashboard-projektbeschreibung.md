@@ -150,19 +150,6 @@ Entwicklung eines minimalistischen Dashboards, das:
 
 ---
 
-## Nicht-Funktionale Anforderungen
-
-| Anforderung | Zielwert | Beschreibung |
-|-------------|----------|--------------|
-| **Performance** | < 1s | Seitenaufruf-Zeit für Dashboard |
-| **Verfügbarkeit** | 99% | Uptime des Services |
-| **Skalierbarkeit** | 5-20 Strategien | Initiale Auslegung |
-| **Response Time** | < 200ms | API-Antwortzeit |
-| **Wartbarkeit** | Hoch | Klare Struktur, dokumentierter Code |
-| **Kompatibilität** | PHP 8.0+ | Mindestversion |
-
----
-
 ## Projektstruktur
 
 ```
@@ -268,51 +255,7 @@ $db_config = [
 ### Hummingbot → Dashboard
 
 **Von Hummingbot-Seite zu implementieren:**
-
-Minütlicher Cron-Job oder Script, das folgende Daten per POST an das Dashboard sendet:
-
-**Beispiel cURL-Request:**
-
-```bash
-curl -X POST https://yourdomain.com/api/update.php \
-  -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "your_secret_api_key_here",
-    "strategy_name": "btc_usdt_strategy_1",
-    "nav": 10250.45678900,
-    "timestamp": "2025-10-22 14:30:00"
-  }'
-```
-
-**Beispiel Python-Script:**
-
-```python
-import requests
-import json
-from datetime import datetime
-
-def send_nav_update(strategy_name, nav_value):
-    url = "https://yourdomain.com/api/update.php"
-    
-    payload = {
-        "api_key": "your_secret_api_key_here",
-        "strategy_name": strategy_name,
-        "nav": nav_value,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    
-    headers = {"Content-Type": "application/json"}
-    
-    try:
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        print(f"Update successful: {response.json()}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error sending update: {e}")
-
-# Verwendung
-send_nav_update("btc_usdt_strategy_1", 10250.45678900)
-```
+wird extern entwickelt, hier nicht relevant
 
 ---
 
@@ -376,7 +319,7 @@ htpasswd -c /var/www/dashboard/.htpasswd admin
 
 ## Entwicklungsphasen
 
-### Phase 1: MVP (Woche 1-2)
+### Phase 1: MVP 
 
 **Sprint 1 - Setup & Grundstruktur:**
 - Projektstruktur aufsetzen
@@ -523,7 +466,7 @@ $db_config = [
 
 - [ ] PHP 8.0+ installiert
 - [ ] SQLite3-Extension aktiviert
-- [ ] Webserver (Apache/Nginx) konfiguriert
+- [ ] Verwende php inbuild server php -S locahost:8000
 - [ ] Projektstruktur erstellt
 - [ ] Datenbank initialisiert
 - [ ] API-Key konfiguriert
@@ -583,100 +526,3 @@ $db_config = [
 
 ---
 
-## Offene Fragen für Implementierung
-
-### Zu klären vor Start:
-
-1. **Hosting:**
-   - Ist ein Webserver/Hosting bereits vorhanden?
-   - Welches Betriebssystem (Linux empfohlen)?
-   - Shared Hosting oder eigener Server/VPS?
-
-2. **Strategien:**
-   - Wie viele Strategien initial? (für Performance-Tests)
-   - Naming-Convention für Strategien?
-   - Maximale erwartete Anzahl Strategien langfristig?
-
-3. **Daten:**
-   - Gewünschte Zeitzone für alle Timestamps?
-   - Wie lange sollen historische Daten aufbewahrt werden?
-   - Backup-Strategie gewünscht?
-
-4. **Zugriff:**
-   - Wie viele Benutzer benötigen Zugriff?
-   - Multi-User-Support erforderlich oder Single-User ausreichend?
-
-5. **Benachrichtigungen:**
-   - Sind E-Mail-Benachrichtigungen bei Ausfällen gewünscht (Phase 2)?
-   - Telegram/Slack-Integration gewünscht (Phase 2)?
-
----
-
-## Ressourcen & Links
-
-### Dokumentation
-- [PHP PDO Dokumentation](https://www.php.net/manual/de/book.pdo.php)
-- [SQLite Dokumentation](https://www.sqlite.org/docs.html)
-- [MySQL Dokumentation](https://dev.mysql.com/doc/)
-- [Hummingbot Dokumentation](https://docs.hummingbot.org/)
-
-### Tools
-- [XAMPP](https://www.apachefriends.org/) - Lokale Entwicklungsumgebung
-- [DB Browser for SQLite](https://sqlitebrowser.org/) - SQLite GUI
-- [Postman](https://www.postman.com/) - API-Testing
-- [Let's Encrypt](https://letsencrypt.org/) - Kostenlose SSL-Zertifikate
-
----
-
-## Support & Wartung
-
-### Regelmäßige Aufgaben
-
-**Täglich:**
-- Dashboard-Verfügbarkeit prüfen
-- Logs auf Fehler überprüfen
-
-**Wöchentlich:**
-- Datenbank-Backup erstellen
-- Performance-Metriken überprüfen
-
-**Monatlich:**
-- Sicherheitsupdates einspielen (PHP, Server)
-- API-Keys rotieren
-- Logs archivieren/löschen
-
----
-
-## Version & Änderungshistorie
-
-| Version | Datum | Änderungen |
-|---------|-------|------------|
-| 1.0 | 2025-10-22 | Initiale MVP-Projektbeschreibung |
-
----
-
-## Kontakt & Verantwortlichkeiten
-
-| Rolle | Verantwortlichkeit |
-|-------|-------------------|
-| **Dashboard-Entwicklung** | PHP-Backend, Frontend, Datenbank |
-| **Hummingbot-Integration** | Daten-Export, API-Calls von Hummingbot |
-| **Server-Administration** | Hosting, Sicherheit, Backups |
-
----
-
-## Nächste Schritte
-
-1. ✅ Projektbeschreibung reviewen und freigeben
-2. ⏳ Entwicklungsumgebung aufsetzen (SQLite)
-3. ⏳ MVP-Implementierung starten
-4. ⏳ Testing durchführen
-5. ⏳ Auf Produktionsserver deployen (MySQL)
-6. ⏳ Hummingbot-Integration implementieren
-7. ⏳ Live-Betrieb starten
-
----
-
-**Projekt:** Hummingbot Monitoring Dashboard MVP  
-**Erstellt:** 22. Oktober 2025  
-**Status:** Planung / Konzeptphase
