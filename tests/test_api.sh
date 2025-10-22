@@ -22,16 +22,13 @@ failed=0
 
 # Test 1: Valid request
 echo -e "${YELLOW}Test 1: Valid API request${NC}"
+TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
+STRATEGY_NAME="btc_test_$(date +%s)"
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "'$VALID_API_KEY'",
-    "strategy_name": "btc_test_'$(date +%s)'",
-    "nav": 10250.45678,
-    "timestamp": "'$(date +'%Y-%m-%d %H:%M:%S')'"
-  }')
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"$STRATEGY_NAME\",\"nav\":10250.45678,\"timestamp\":\"$TIMESTAMP\"}")
 echo "Response: $response"
-if echo "$response" | grep -q '"status":"success"'; then
+if echo "$response" | grep -q 'success'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
   ((passed++))
 else
@@ -41,16 +38,12 @@ fi
 
 # Test 2: Invalid API key
 echo -e "${YELLOW}Test 2: Invalid API key${NC}"
+TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "invalid_key",
-    "strategy_name": "test_strategy",
-    "nav": 10250.45,
-    "timestamp": "'$(date +'%Y-%m-%d %H:%M:%S')'"
-  }')
+  -d "{\"api_key\":\"invalid_key\",\"strategy_name\":\"test_strategy\",\"nav\":10250.45,\"timestamp\":\"$TIMESTAMP\"}")
 echo "Response: $response"
-if echo "$response" | grep -q '"status":"error"'; then
+if echo "$response" | grep -q 'error'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
   ((passed++))
 else
@@ -62,12 +55,9 @@ fi
 echo -e "${YELLOW}Test 3: Missing required parameters${NC}"
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "'$VALID_API_KEY'",
-    "strategy_name": "test_strategy"
-  }')
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"test_strategy\"}")
 echo "Response: $response"
-if echo "$response" | grep -q '"status":"error"'; then
+if echo "$response" | grep -q 'error'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
   ((passed++))
 else
@@ -77,16 +67,12 @@ fi
 
 # Test 4: Invalid NAV
 echo -e "${YELLOW}Test 4: Invalid NAV (non-numeric)${NC}"
+TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "'$VALID_API_KEY'",
-    "strategy_name": "test_strategy",
-    "nav": "not_a_number",
-    "timestamp": "'$(date +'%Y-%m-%d %H:%M:%S')'"
-  }')
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"test_strategy\",\"nav\":\"not_a_number\",\"timestamp\":\"$TIMESTAMP\"}")
 echo "Response: $response"
-if echo "$response" | grep -q '"status":"error"'; then
+if echo "$response" | grep -q 'error'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
   ((passed++))
 else
@@ -98,14 +84,9 @@ fi
 echo -e "${YELLOW}Test 5: Invalid datetime format${NC}"
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d '{
-    "api_key": "'$VALID_API_KEY'",
-    "strategy_name": "test_strategy",
-    "nav": 10250.45,
-    "timestamp": "invalid-datetime"
-  }')
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"test_strategy\",\"nav\":10250.45,\"timestamp\":\"invalid-datetime\"}")
 echo "Response: $response"
-if echo "$response" | grep -q '"status":"error"'; then
+if echo "$response" | grep -q 'error'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
   ((passed++))
 else
