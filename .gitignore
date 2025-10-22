@@ -1,0 +1,17 @@
+# PhpStorm
+.idea/
+
+# Dependencies
+/vendor/
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
