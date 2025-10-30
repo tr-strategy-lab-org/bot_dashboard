@@ -1,21 +1,30 @@
 <?php
 
-// Entwicklung: SQLite
-$db_config = [
-    'type' => 'sqlite',
-    'path' => __DIR__ . '/../data/database.sqlite'
-];
+// Load environment configuration
+require_once __DIR__ . '/environment.php';
 
-// Produktion: MySQL (auskommentiert)
-// $db_config = [
-//     'type' => 'mysql',
-//     'host' => 'localhost',
-//     'dbname' => 'hummingbot_dashboard',
-//     'username' => 'db_user',
-//     'password' => 'secure_password',
-//     'charset' => 'utf8mb4'
-// ];
+// Determine database configuration based on environment
+if (isDevelopment()) {
+    // Development: SQLite
+    $db_config = [
+        'type' => getConfigEnv('DB_TYPE_DEV', 'sqlite'),
+        'path' => getConfigEnv('DB_PATH_DEV', __DIR__ . '/../data/database.sqlite')
+    ];
+} else {
+    // Production: MySQL
+    $db_config = [
+        'type' => getConfigEnv('DB_TYPE_PROD', 'mysql'),
+        'host' => getConfigEnv('DB_HOST_PROD', 'localhost'),
+        'dbname' => getConfigEnv('DB_NAME_PROD', 'hummingbot_dashboard'),
+        'username' => getConfigEnv('DB_USER_PROD', 'dashboard_user'),
+        'password' => getConfigEnv('DB_PASS_PROD', ''),
+        'charset' => getConfigEnv('DB_CHARSET_PROD', 'utf8mb4')
+    ];
+}
 
+/**
+ * Get PDO database connection based on environment
+ */
 function getPDO() {
     global $db_config;
 

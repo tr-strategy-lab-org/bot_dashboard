@@ -21,13 +21,21 @@ function formatNav($nav, $decimals = null) {
 
 /**
  * Format timestamp to readable format (DD.MM.YYYY HH:MM:SS)
+ * Assumes incoming timestamp is UTC and converts to configured timezone
  *
- * @param string $timestamp ISO timestamp or datetime string
- * @return string Formatted timestamp
+ * @param string $timestamp ISO timestamp or datetime string (assumed to be UTC)
+ * @return string Formatted timestamp in local timezone
  */
 function formatTimestamp($timestamp) {
+    $config = include __DIR__ . '/../config/config.php';
+
     try {
-        $date = new DateTime($timestamp);
+        // Create DateTime object treating input as UTC
+        $date = new DateTime($timestamp, new DateTimeZone('UTC'));
+
+        // Convert to configured timezone
+        $date->setTimeZone(new DateTimeZone($config['timezone']));
+
         return $date->format('d.m.Y H:i:s');
     } catch (Exception $e) {
         return 'Invalid date';
@@ -36,18 +44,25 @@ function formatTimestamp($timestamp) {
 
 /**
  * Calculate status based on data age
+ * Assumes lastUpdate timestamp is UTC
  *
- * @param string $lastUpdate The last update timestamp
+ * @param string $lastUpdate The last update timestamp (assumed to be UTC)
  * @return array ['status' => string, 'indicator' => string, 'minutes_old' => int]
  */
 function getDataStatus($lastUpdate) {
     $config = include __DIR__ . '/../config/config.php';
 
     try {
-        $lastTime = new DateTime($lastUpdate);
-        $now = new DateTime();
+        // Create DateTime objects in UTC timezone
+        $lastTime = new DateTime($lastUpdate, new DateTimeZone('UTC'));
+        $now = new DateTime('now', new DateTimeZone('UTC'));
+
+        // Calculate the difference
         $interval = $now->diff($lastTime);
         $minutesOld = (int) $interval->format('%i') + ((int) $interval->format('%h') * 60);
+
+        // Add days to minutes calculation
+        $minutesOld += (int) $interval->format('%d') * 24 * 60;
 
         $thresholds = $config['status_thresholds'];
 
