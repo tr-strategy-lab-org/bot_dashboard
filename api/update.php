@@ -110,11 +110,6 @@ try {
     $nav = floatval($input['nav']);
     $timestamp = $input['timestamp'];
 
-    // Store UTC timestamp as-is in the database
-    // The incoming timestamp is assumed to be in UTC format
-    // Display layer will convert to configured timezone
-    $storedTimestamp = $timestamp;
-
     // UPSERT logic: Try INSERT, if strategy_name exists, UPDATE
     $stmt = $pdo->prepare('
         INSERT INTO strategies (strategy_name, nav, last_update)
@@ -137,17 +132,17 @@ try {
             SET nav = ?, last_update = ?
             WHERE strategy_name = ?
         ');
-        $updateStmt->execute([$nav, $storedTimestamp, $strategyName]);
+        $updateStmt->execute([$nav, $timestamp, $strategyName]);
     } else {
         // INSERT new strategy
         $insertStmt = $pdo->prepare('
             INSERT INTO strategies (strategy_name, nav, last_update)
             VALUES (?, ?, ?)
         ');
-        $insertStmt->execute([$strategyName, $nav, $storedTimestamp]);
+        $insertStmt->execute([$strategyName, $nav, $timestamp]);
     }
 
-    logMessage('api', "Strategy '{$strategyName}' updated successfully. NAV: {$nav}, Timestamp (UTC): {$timestamp}");
+    logMessage('api', "Strategy '{$strategyName}' updated successfully. NAV: {$nav}, Timestamp: {$timestamp}");
 
     sendJsonResponse(200, [
         'status' => 'success',
