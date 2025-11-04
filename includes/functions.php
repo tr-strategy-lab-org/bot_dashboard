@@ -21,13 +21,21 @@ function formatNav($nav, $decimals = null) {
 
 /**
  * Format timestamp to readable format (DD.MM.YYYY HH:MM:SS)
+ * Converts UTC timestamps from bot to Vienna time (Europe/Vienna)
  *
- * @param string $timestamp ISO timestamp or datetime string
- * @return string Formatted timestamp
+ * @param string $timestamp ISO timestamp or datetime string (assumed to be UTC from bot)
+ * @return string Formatted timestamp in Vienna time
  */
 function formatTimestamp($timestamp) {
     try {
-        $date = new DateTime($timestamp);
+        $config = include __DIR__ . '/../config/config.php';
+
+        // Create DateTime object assuming the input is in UTC
+        $date = new DateTime($timestamp, new DateTimeZone('UTC'));
+
+        // Convert to configured timezone (Vienna)
+        $date->setTimezone(new DateTimeZone($config['timezone']));
+
         return $date->format('d.m.Y H:i:s');
     } catch (Exception $e) {
         return 'Invalid date';
@@ -36,16 +44,25 @@ function formatTimestamp($timestamp) {
 
 /**
  * Calculate status based on data age
+ * Properly handles UTC timestamps from bot and compares with Vienna time
  *
- * @param string $lastUpdate The last update timestamp
+ * @param string $lastUpdate The last update timestamp (assumed to be UTC from bot)
  * @return array ['status' => string, 'indicator' => string, 'minutes_old' => int]
  */
 function getDataStatus($lastUpdate) {
     $config = include __DIR__ . '/../config/config.php';
 
     try {
-        $lastTime = new DateTime($lastUpdate);
-        $now = new DateTime();
+        // Create DateTime object from UTC timestamp (from bot)
+        $lastTime = new DateTime($lastUpdate, new DateTimeZone('UTC'));
+
+        // Create current time in Vienna timezone
+        $now = new DateTime('now', new DateTimeZone($config['timezone']));
+
+        // Convert last update to Vienna timezone for proper comparison
+        $lastTime->setTimezone(new DateTimeZone($config['timezone']));
+
+        // Calculate difference
         $interval = $now->diff($lastTime);
         $minutesOld = (int) $interval->format('%i') + ((int) $interval->format('%h') * 60);
 
