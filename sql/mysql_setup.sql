@@ -2,6 +2,11 @@ CREATE TABLE IF NOT EXISTS strategies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     strategy_name VARCHAR(100) UNIQUE NOT NULL,
     nav DECIMAL(20,8) NOT NULL,
+    nav_btc DECIMAL(20,8),
+    system_token VARCHAR(20),
+    fee_currency_balance DECIMAL(20,8),
+    fee_currency_balance_usd DECIMAL(20,8),
+    last_trade DATETIME,
     last_update TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_strategy_name (strategy_name),
     INDEX idx_last_update (last_update)

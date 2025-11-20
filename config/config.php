@@ -5,7 +5,7 @@ return [
     'api_key' => 'your_secret_api_key_change_this_in_production',
 
     // Dashboard-Konfiguration
-    'dashboard_title' => 'Hummingbot Strategy Monitor',
+    'dashboard_title' => 'My local Test Dashboard',
     'refresh_interval' => 60, // Sekunden
 
     // Zeitkonfiguration

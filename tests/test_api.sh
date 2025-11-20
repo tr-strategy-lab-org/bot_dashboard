@@ -20,13 +20,14 @@ NC='\033[0m' # No Color
 passed=0
 failed=0
 
-# Test 1: Valid request
-echo -e "${YELLOW}Test 1: Valid API request${NC}"
+# Test 1: Valid request with last_trade
+echo -e "${YELLOW}Test 1: Valid API request with last_trade${NC}"
 TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
+LAST_TRADE=$(date -u -d '-5 minutes' +'%Y-%m-%d %H:%M:%S' 2>/dev/null || date -u -v-5M +'%Y-%m-%d %H:%M:%S')
 STRATEGY_NAME="btc_test_$(date +%s)"
 response=$(curl -s -X POST "$API_ENDPOINT" \
   -H "Content-Type: application/json" \
-  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"$STRATEGY_NAME\",\"nav\":10250.45678,\"timestamp\":\"$TIMESTAMP\"}")
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"$STRATEGY_NAME\",\"nav\":10250.45678,\"nav_btc\":0.25,\"fee_currency_balance\":5.5,\"last_trade\":\"$LAST_TRADE\",\"timestamp\":\"$TIMESTAMP\"}")
 echo "Response: $response"
 if echo "$response" | grep -q 'success'; then
   echo -e "${GREEN}✓ PASS${NC}\n"
@@ -94,8 +95,23 @@ else
   ((failed++))
 fi
 
-# Test 6: GET request (should be rejected)
-echo -e "${YELLOW}Test 6: GET request (should be rejected)${NC}"
+# Test 6: Invalid last_trade format
+echo -e "${YELLOW}Test 6: Invalid last_trade format${NC}"
+TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
+response=$(curl -s -X POST "$API_ENDPOINT" \
+  -H "Content-Type: application/json" \
+  -d "{\"api_key\":\"$VALID_API_KEY\",\"strategy_name\":\"test_strategy\",\"nav\":10250.45,\"last_trade\":\"invalid-date\",\"timestamp\":\"$TIMESTAMP\"}")
+echo "Response: $response"
+if echo "$response" | grep -q 'error'; then
+  echo -e "${GREEN}✓ PASS${NC}\n"
+  ((passed++))
+else
+  echo -e "${RED}✗ FAIL${NC}\n"
+  ((failed++))
+fi
+
+# Test 7: GET request (should be rejected)
+echo -e "${YELLOW}Test 7: GET request (should be rejected)${NC}"
 http_code=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$API_ENDPOINT")
 echo "HTTP Code: $http_code"
 if [ "$http_code" = "405" ]; then

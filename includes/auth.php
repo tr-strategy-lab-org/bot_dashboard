@@ -88,3 +88,35 @@ function validateDatetime($datetime) {
 
     return ['valid' => true, 'error' => null];
 }
+
+/**
+ * Validate and convert Unix timestamp to datetime string
+ *
+ * @param mixed $timestamp Unix timestamp (integer or string representation)
+ * @return array ['valid' => bool, 'datetime' => string|null, 'error' => string|null]
+ */
+function validateUnixTimestamp($timestamp) {
+    // Accept string or integer
+    $timestamp = is_string($timestamp) ? trim($timestamp) : $timestamp;
+
+    // Check if it's a valid integer or numeric string
+    if (!is_numeric($timestamp)) {
+        return ['valid' => false, 'datetime' => null, 'error' => 'Unix timestamp must be numeric'];
+    }
+
+    $unixTime = intval($timestamp);
+
+    // Validate it's a reasonable timestamp (between 1970 and year 2100)
+    if ($unixTime < 0 || $unixTime > 4102444800) {
+        return ['valid' => false, 'datetime' => null, 'error' => 'Unix timestamp must be between 1970 and year 2100'];
+    }
+
+    // Convert to datetime string
+    try {
+        $date = new DateTime('@' . $unixTime);
+        $datetime = $date->format('Y-m-d H:i:s');
+        return ['valid' => true, 'datetime' => $datetime, 'error' => null];
+    } catch (Exception $e) {
+        return ['valid' => false, 'datetime' => null, 'error' => 'Invalid Unix timestamp'];
+    }
+}

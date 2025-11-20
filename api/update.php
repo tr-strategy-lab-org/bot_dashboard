@@ -11,8 +11,16 @@
  *   "api_key": "your_secret_api_key_here",
  *   "strategy_name": "btc_usdt_strategy_1",
  *   "nav": 10250.45678900,
+ *   "nav_btc": 0.25678900,
+ *   "system_token": "ETH",
+ *   "fee_currency_balance": 10,
+ *   "fee_currency_balance_usd": 20000,
+ *   "last_trade": 1729609530,
  *   "timestamp": "2025-10-22 14:30:00"
  * }
+ *
+ * Note: nav_btc, system_token, fee_currency_balance, fee_currency_balance_usd, and last_trade are optional
+ * Note: last_trade accepts Unix timestamp (integer or string)
  */
 
 // Set headers
@@ -21,6 +29,9 @@ header('Content-Type: application/json; charset=utf-8');
 // Enable error logging but disable output
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
+
+// Debug mode - set to false in production
+define('DEBUG_MODE', true);
 
 // Requires
 require_once __DIR__ . '/../config/config.php';
@@ -40,26 +51,42 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $config = include __DIR__ . '/../config/config.php';
 
 // Parse JSON input
-$input = json_decode(file_get_contents('php://input'), true);
+$rawInput = file_get_contents('php://input');
+if (DEBUG_MODE) {
+    logMessage('api', 'Raw input received: ' . substr($rawInput, 0, 500));
+}
+$input = json_decode($rawInput, true);
 
 if ($input === null) {
-    logMessage('api', 'Invalid JSON received');
-    sendJsonResponse(400, [
+    logMessage('api', 'Invalid JSON received: ' . json_last_error_msg());
+    $response = [
         'status' => 'error',
         'message' => 'Invalid JSON format'
-    ]);
+    ];
+    if (DEBUG_MODE) {
+        $response['debug'] = 'JSON Error: ' . json_last_error_msg();
+    }
+    sendJsonResponse(400, $response);
 }
 
 // Validate required parameters
 $required = ['api_key', 'strategy_name', 'nav', 'timestamp'];
 $validation = validateRequired($input, $required);
 
+if (DEBUG_MODE) {
+    logMessage('api', 'Parameter validation: ' . json_encode($validation));
+}
+
 if (!$validation['valid']) {
     logMessage('api', 'Missing parameters: ' . implode(', ', $validation['missing']));
-    sendJsonResponse(400, [
+    $response = [
         'status' => 'error',
         'message' => 'Missing required parameters: ' . implode(', ', $validation['missing'])
-    ]);
+    ];
+    if (DEBUG_MODE) {
+        $response['debug'] = $validation;
+    }
+    sendJsonResponse(400, $response);
 }
 
 // Validate API key
@@ -91,6 +118,78 @@ if (!$navValidation['valid']) {
     ]);
 }
 
+// Validate NAV-BTC (optional)
+$navBtc = null;
+if (isset($input['nav_btc']) && $input['nav_btc'] !== null && $input['nav_btc'] !== '') {
+    $navBtcValidation = validateNumeric($input['nav_btc'], 'NAV-BTC');
+    if (!$navBtcValidation['valid']) {
+        logMessage('api', $navBtcValidation['error']);
+        sendJsonResponse(400, [
+            'status' => 'error',
+            'message' => $navBtcValidation['error']
+        ]);
+    }
+    $navBtc = floatval($input['nav_btc']);
+}
+
+// Validate System Token (optional)
+$systemToken = null;
+if (isset($input['system_token']) && $input['system_token'] !== null && $input['system_token'] !== '') {
+    $systemToken = trim($input['system_token']);
+    // Simple validation: max 20 characters, alphanumeric
+    if (strlen($systemToken) > 20 || !preg_match('/^[a-zA-Z0-9]+$/', $systemToken)) {
+        logMessage('api', 'Invalid system token: must be max 20 alphanumeric characters');
+        sendJsonResponse(400, [
+            'status' => 'error',
+            'message' => 'System token must be max 20 alphanumeric characters'
+        ]);
+    }
+}
+
+// Validate Fee Currency Balance (optional)
+$feeCurrencyBalance = null;
+if (isset($input['fee_currency_balance']) && $input['fee_currency_balance'] !== null && $input['fee_currency_balance'] !== '') {
+    $feeCurrencyValidation = validateNumeric($input['fee_currency_balance'], 'Fee Currency Balance');
+    if (!$feeCurrencyValidation['valid']) {
+        logMessage('api', $feeCurrencyValidation['error']);
+        sendJsonResponse(400, [
+            'status' => 'error',
+            'message' => $feeCurrencyValidation['error']
+        ]);
+    }
+    $feeCurrencyBalance = floatval($input['fee_currency_balance']);
+}
+
+// Validate Fee Currency Balance USD (optional)
+$feeCurrencyBalanceUsd = null;
+if (isset($input['fee_currency_balance_usd']) && $input['fee_currency_balance_usd'] !== null && $input['fee_currency_balance_usd'] !== '') {
+    $feeCurrencyUsdValidation = validateNumeric($input['fee_currency_balance_usd'], 'Fee Currency Balance USD');
+    if (!$feeCurrencyUsdValidation['valid']) {
+        logMessage('api', $feeCurrencyUsdValidation['error']);
+        sendJsonResponse(400, [
+            'status' => 'error',
+            'message' => $feeCurrencyUsdValidation['error']
+        ]);
+    }
+    $feeCurrencyBalanceUsd = floatval($input['fee_currency_balance_usd']);
+}
+
+// Validate Last Trade (optional, Unix timestamp format)
+$lastTrade = null;
+if (isset($input['last_trade']) && $input['last_trade'] !== null && $input['last_trade'] !== '') {
+    $lastTradeValidation = validateUnixTimestamp($input['last_trade']);
+    if (!$lastTradeValidation['valid']) {
+        logMessage('api', $lastTradeValidation['error']);
+        sendJsonResponse(400, [
+            'status' => 'error',
+            'message' => $lastTradeValidation['error']
+        ]);
+    }
+    $lastTrade = $lastTradeValidation['datetime'];
+}
+
+
+
 // Validate datetime
 $datetimeValidation = validateDatetime($input['timestamp']);
 if (!$datetimeValidation['valid']) {
@@ -110,12 +209,19 @@ try {
     $nav = floatval($input['nav']);
     $timestamp = $input['timestamp'];
 
+    if (DEBUG_MODE) {
+        logMessage('api', "Processing: Strategy=$strategyName, NAV=$nav, NAV_BTC=$navBtc, Fee=$feeCurrencyBalance");
+        logMessage('api', "Fee Currency Balance received: " . (isset($input['fee_currency_balance']) ? $input['fee_currency_balance'] : 'NOT SET'));
+        logMessage('api', "Full input data: " . json_encode($input));
+    }
+
     // UPSERT logic: Try INSERT, if strategy_name exists, UPDATE
     $stmt = $pdo->prepare('
-        INSERT INTO strategies (strategy_name, nav, last_update)
-        VALUES (:strategy_name, :nav, :timestamp)
+        INSERT INTO strategies (strategy_name, nav, nav_btc, last_update)
+        VALUES (:strategy_name, :nav, :nav_btc, :timestamp)
         ON CONFLICT(strategy_name) DO UPDATE SET
             nav = :nav,
+            nav_btc = :nav_btc,
             last_update = :timestamp
     ');
 
@@ -129,20 +235,37 @@ try {
         // UPDATE existing strategy
         $updateStmt = $pdo->prepare('
             UPDATE strategies
-            SET nav = ?, last_update = ?
+            SET nav = ?, nav_btc = ?, system_token = ?, fee_currency_balance = ?, fee_currency_balance_usd = ?, last_trade = ?, last_update = ?
             WHERE strategy_name = ?
         ');
-        $updateStmt->execute([$nav, $timestamp, $strategyName]);
+        $updateStmt->execute([$nav, $navBtc, $systemToken, $feeCurrencyBalance, $feeCurrencyBalanceUsd, $lastTrade, $timestamp, $strategyName]);
     } else {
         // INSERT new strategy
         $insertStmt = $pdo->prepare('
-            INSERT INTO strategies (strategy_name, nav, last_update)
-            VALUES (?, ?, ?)
+            INSERT INTO strategies (strategy_name, nav, nav_btc, system_token, fee_currency_balance, fee_currency_balance_usd, last_trade, last_update)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ');
-        $insertStmt->execute([$strategyName, $nav, $timestamp]);
+        $insertStmt->execute([$strategyName, $nav, $navBtc, $systemToken, $feeCurrencyBalance, $feeCurrencyBalanceUsd, $lastTrade, $timestamp]);
     }
 
-    logMessage('api', "Strategy '{$strategyName}' updated successfully. NAV: {$nav}, Timestamp: {$timestamp}");
+    $logMsg = "Strategy '{$strategyName}' updated successfully. NAV: {$nav}";
+    if ($navBtc !== null) {
+        $logMsg .= ", NAV-BTC: {$navBtc}";
+    }
+    if ($systemToken !== null) {
+        $logMsg .= ", System Token: {$systemToken}";
+    }
+    if ($feeCurrencyBalance !== null) {
+        $logMsg .= ", Fee Currency Balance: {$feeCurrencyBalance}";
+    }
+    if ($feeCurrencyBalanceUsd !== null) {
+        $logMsg .= ", Fee Currency Balance USD: {$feeCurrencyBalanceUsd}";
+    }
+    if ($lastTrade !== null) {
+        $logMsg .= ", Last Trade: {$lastTrade}";
+    }
+    $logMsg .= ", Timestamp: {$timestamp}";
+    logMessage('api', $logMsg);
 
     sendJsonResponse(200, [
         'status' => 'success',

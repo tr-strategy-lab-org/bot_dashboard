@@ -16,18 +16,21 @@ class ApiTest {
         echo "\n=== API Tests ===\n\n";
 
         $this->testValidRequest();
+        $this->testValidRequestWithNavBtc();
         $this->testInvalidApiKey();
         $this->testMissingParameters();
         $this->testInvalidStrategyName();
         $this->testInvalidNav();
+        $this->testInvalidNavBtc();
         $this->testInvalidDatetime();
         $this->testUpsertFunctionality();
+        $this->testUpsertWithNavBtc();
 
         $this->printResults();
     }
 
     private function testValidRequest() {
-        echo "Test 1: Valid API request\n";
+        echo "Test 1: Valid API request (without NAV-BTC)\n";
 
         $data = [
             'api_key' => $this->validApiKey,
@@ -40,8 +43,23 @@ class ApiTest {
         $this->assert($response['status'] === 'success', 'Valid request should succeed');
     }
 
+    private function testValidRequestWithNavBtc() {
+        echo "Test 2: Valid API request (with NAV-BTC)\n";
+
+        $data = [
+            'api_key' => $this->validApiKey,
+            'strategy_name' => 'test_strategy_with_btc',
+            'nav' => 10250.45678,
+            'nav_btc' => 0.25678,
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        $response = $this->makeRequest($data);
+        $this->assert($response['status'] === 'success', 'Valid request with NAV-BTC should succeed');
+    }
+
     private function testInvalidApiKey() {
-        echo "Test 2: Invalid API key\n";
+        echo "Test 3: Invalid API key\n";
 
         $data = [
             'api_key' => 'invalid_api_key',
@@ -55,7 +73,7 @@ class ApiTest {
     }
 
     private function testMissingParameters() {
-        echo "Test 3: Missing required parameters\n";
+        echo "Test 4: Missing required parameters\n";
 
         $data = [
             'api_key' => $this->validApiKey,
@@ -68,7 +86,7 @@ class ApiTest {
     }
 
     private function testInvalidStrategyName() {
-        echo "Test 4: Invalid strategy name (too long)\n";
+        echo "Test 5: Invalid strategy name (too long)\n";
 
         $data = [
             'api_key' => $this->validApiKey,
@@ -82,7 +100,7 @@ class ApiTest {
     }
 
     private function testInvalidNav() {
-        echo "Test 5: Invalid NAV (non-numeric)\n";
+        echo "Test 6: Invalid NAV (non-numeric)\n";
 
         $data = [
             'api_key' => $this->validApiKey,
@@ -95,8 +113,23 @@ class ApiTest {
         $this->assert($response['status'] === 'error' && $response['status_code'] === 400, 'Invalid NAV should be rejected');
     }
 
+    private function testInvalidNavBtc() {
+        echo "Test 7: Invalid NAV-BTC (non-numeric)\n";
+
+        $data = [
+            'api_key' => $this->validApiKey,
+            'strategy_name' => 'test_strategy',
+            'nav' => 10250.45,
+            'nav_btc' => 'not_a_number',
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        $response = $this->makeRequest($data);
+        $this->assert($response['status'] === 'error' && $response['status_code'] === 400, 'Invalid NAV-BTC should be rejected');
+    }
+
     private function testInvalidDatetime() {
-        echo "Test 6: Invalid datetime format\n";
+        echo "Test 8: Invalid datetime format\n";
 
         $data = [
             'api_key' => $this->validApiKey,
@@ -110,7 +143,7 @@ class ApiTest {
     }
 
     private function testUpsertFunctionality() {
-        echo "Test 7: UPSERT functionality (insert then update)\n";
+        echo "Test 9: UPSERT functionality (insert then update)\n";
 
         $strategyName = 'upsert_test_' . time();
         $nav1 = 5000.0;
@@ -139,6 +172,42 @@ class ApiTest {
         $updateSuccess = $response2['status'] === 'success';
 
         $this->assert($insertSuccess && $updateSuccess, 'UPSERT functionality should work correctly');
+    }
+
+    private function testUpsertWithNavBtc() {
+        echo "Test 10: UPSERT functionality with NAV-BTC\n";
+
+        $strategyName = 'upsert_btc_test_' . time();
+        $nav1 = 5000.0;
+        $navBtc1 = 0.1;
+        $nav2 = 6000.0;
+        $navBtc2 = 0.15;
+
+        // First request: INSERT with NAV-BTC
+        $data1 = [
+            'api_key' => $this->validApiKey,
+            'strategy_name' => $strategyName,
+            'nav' => $nav1,
+            'nav_btc' => $navBtc1,
+            'timestamp' => date('Y-m-d H:i:s')
+        ];
+
+        $response1 = $this->makeRequest($data1);
+        $insertSuccess = $response1['status'] === 'success';
+
+        // Second request: UPDATE same strategy with different NAV and NAV-BTC
+        $data2 = [
+            'api_key' => $this->validApiKey,
+            'strategy_name' => $strategyName,
+            'nav' => $nav2,
+            'nav_btc' => $navBtc2,
+            'timestamp' => date('Y-m-d H:i:s', time() + 60)
+        ];
+
+        $response2 = $this->makeRequest($data2);
+        $updateSuccess = $response2['status'] === 'success';
+
+        $this->assert($insertSuccess && $updateSuccess, 'UPSERT with NAV-BTC should work correctly');
     }
 
     private function makeRequest($data) {

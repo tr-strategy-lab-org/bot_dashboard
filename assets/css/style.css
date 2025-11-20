@@ -44,10 +44,17 @@ h1 {
     padding: 2rem;
     border-radius: 0.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    text-align: center;
+}
+
+.total-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
 }
 
 .total-nav-label {
@@ -126,6 +133,7 @@ h1 {
     display: inline-block;
 }
 
+
 /* Code Styling for NAV */
 code {
     background-color: #f8f9fa;
@@ -168,6 +176,7 @@ code {
     .total-nav-box {
         padding: 1.5rem;
         margin-bottom: 1.5rem;
+        gap: 1.5rem;
     }
 
     .total-nav-value {
@@ -207,6 +216,8 @@ code {
 
     .total-nav-box {
         padding: 1.25rem;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 
     .total-nav-value {
